@@ -1,0 +1,112 @@
+/* JournalPage.module.css */
+.journalPage {
+  background: url('/Diary_Background.jpg') no-repeat center center fixed;
+  background-size: contain;
+  width: 60%;
+  max-width: 800px; /* Maximum width to constrain the journal */
+  height: 100vh; /* Ensure the page takes full viewport height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  margin: 0 auto; /* Center the journalPage horizontally */
+}
+  
+.container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.textarea {
+  width: 300%;
+  min-width: 100px;
+  max-width: 400px;
+  height: 500px;
+  background-color: transparent;
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  overflow: auto;
+  font-family: inherit; /* Inherit font-family */
+  position: relative;
+}
+
+.button {
+  margin-top: 20px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-start; /* Align toolbar items to the left */
+  margin-bottom: 10px;
+  width: 24%; /* Make the toolbar full width */
+  padding: 10px; /* Add padding inside the toolbar */
+  border: 1px solid #ccc; /* Add a border around the toolbar */
+  background-color: #f9f9f9; /* Add a background color */
+  border-radius: 5px; /* Optional: Add rounded corners */
+}
+
+.toolbar button {
+  background-color: white;
+  border: 1px solid #ccc;
+  margin: 0 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.toolbar button:hover {
+  background-color: #e0e0e0;
+}
+
+.font-select {
+  margin-left: 10px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.fileInput {
+  margin-top: 10px;
+}
+
+.uploadedImage {
+  max-width: 100%; /* Ensure image does not exceed its container */
+  max-height: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.contentArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* Ensure positioned elements stay within this container */
+}
+
+.imageUploadContainer {
+  position: absolute; /* Position the upload container absolutely */
+  top: 20px; /* Position it 20px from the top */
+  left: 20px; /* Position it 20px from the left */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px; /* Add padding inside the container */
+  border: 1px solid #ccc; /* Add a border around the container */
+  background-color: #f9f9f9; /* Add a background color */
+  border-radius: 5px; /* Optional: Add rounded corners */
+}
+
+.draggableResizableImage {
+  position: absolute;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  border: none;
+}

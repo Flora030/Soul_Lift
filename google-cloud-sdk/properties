@@ -1,0 +1,6 @@
+[core]
+disable_usage_reporting = False
+
+[metrics]
+client_arch = x86_64
+

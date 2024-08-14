@@ -1,0 +1,122 @@
+/* styles.css */
+.calendar-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: none;
+}
+
+.calendar-wrapper {
+  position: relative;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.custom-calendar {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  background: none !important; /* Remove default background color */
+  border: none !important; /* Remove default border if any */
+  padding: 60px;
+}
+
+.selected-date {
+  border: 3px solid #00acc1 !important; /* Bolder outline */
+  border-radius: 4px; /* Optional: rounded corners */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow for emphasis */
+  background-color: transparent !important; /* Ensure the background is not altered */
+}
+
+.custom-calendar .fc {
+  font-size: 0.8em; /* Adjust the font size if needed */
+}
+  
+.custom-calendar .fc-toolbar-title {
+  font-size: 1.2em; /* Adjust the title font size if needed */
+}
+
+/* Remove the default background and border from calendar events */
+.fc-event, .fc-event-dot {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.calendar-actions {
+  position: absolute;
+  top: 10px;
+  right: 50px;
+  transform: translateX(-100%); /* Adjust to align the center of the dropdown */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.actions-dropdown {
+  padding: 10px 0;
+  max-width: 100%;
+  width: 150px;
+  margin-right: 0px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.day-cell {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dropdown-item {
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+  
+.icon-margin {
+  margin-right: 25px; /* Adjust the value as needed */
+}
+
+/* styles.css */
+.sticker-display {
+  position: absolute;
+  top: 70px; /* Adjust as needed */
+  right: 10px; /* Center horizontally */
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Higher than the calendar */
+  max-width: 400px; /* Adjust width */
+  overflow: hidden; /* Ensure no overflow */
+}
+
+.note-display {
+  position: absolute;
+  top: 70px; /* Adjust as needed */
+  right: 10px; /* Center horizontally */
+}
+
+.note-count-badge {
+  position: absolute;
+  top: -10px;
+  right:50px;
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 5px;
+  font-size: 0.75em;
+}
+
+.reminder-display {
+  position: absolute;
+  top: 70px; /* Adjust as needed */
+  right: 10px; /* Center horizontally */
+}
