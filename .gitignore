@@ -36,3 +36,4 @@ yarn-error.log*
 next-env.d.ts
 google-cloud-sdk/
 *.tar.gz
+google-cloud-sdk/
