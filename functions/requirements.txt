@@ -1,5 +1,0 @@
-firebase_functions~=0.1.0
-firebase-admin
-flask
-functions-framework
-flask-cors
