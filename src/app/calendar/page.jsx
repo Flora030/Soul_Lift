@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, SmilePlus, StickyNote, MessageSquare, BellRing } from "lucide-react";
+import { Plus, SmilePlus, StickyNote, MessageSquare, BellRing, X } from "lucide-react";
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid' 
 import interactionPlugin from "@fullcalendar/interaction" // Need for dayClick
@@ -25,7 +25,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Textarea } from "@/components/ui/textarea"
-import { getDocs, collection, doc, updateDoc, addDoc, deleteDoc, getDoc, setDoc, query } from "firebase/firestore";
+import { getDocs, collection, doc, updateDoc, addDoc, deleteDoc, getDoc, setDoc, query, where } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -61,6 +61,14 @@ const stickerImages = [
     { id: 28, src: '/Happy.png', alt: 'Clipart 28' },
 ];
 
+// CSS for Close Button
+const closeButtonStyle = {
+    position: 'absolute',
+    top: '10px',
+    right: '10px',
+    zIndex: 1000, // Ensure the close button is above other elements
+};
+
 export default function Calendar() {
 
     const [selectedDate, setSelectedDate] = useState(null);
@@ -73,6 +81,7 @@ export default function Calendar() {
     const [showAddReminder, setShowAddReminder] = useState(false);
     const [reminderContent, setReminderContent] = useState("");
     const [lastClick, setLastClick] = useState({ time: 0, date: null });
+    const [selectedSticker, setSelectedSticker] = useState(null); // Track selected sticker for highlight function
 
     const router = useRouter();
 
@@ -110,9 +119,11 @@ export default function Calendar() {
         else{
             setLastClick({ time: now, date: info.dateStr });
             setSelectedDate(info.dateStr);
-            //console.log("89 Date Click", selectedDate);
             setShowStickers(false); // Reset sticker display when a new date is clicked
             setShowAddNote(false);
+            // Find the sticker for this date, if it exists
+            const eventForDate = events.find(event => event.date === info.dateStr && event.extendedProps.type === 'sticker');
+            setSelectedSticker(eventForDate ? eventForDate.extendedProps.image : null);
         }
     };
 
@@ -180,23 +191,55 @@ export default function Calendar() {
         const eventIndex = events.findIndex(event => event.extendedProps && event.date === selectedDate && event.extendedProps.type === 'sticker');
 
         if (eventIndex > -1) {
-            // Replace the existing sticker with the new one
-            updatedEvents[eventIndex] = { ...updatedEvents[eventIndex], extendedProps: { type: 'sticker', image: sticker.src } };
+            // Sticker already exists for this date
+            if (updatedEvents[eventIndex].extendedProps.image === sticker.src) {
+                console.log("185 sticker.src", sticker.src);
+                // If the clicked sticker is the same, remove the sticker event
+                updatedEvents = updatedEvents.filter(event => !(event.date === selectedDate && event.extendedProps.type === 'sticker'));
+                
+                // Remove from Firebase
+                try {
+                    const q = query(collection(db, "events"), where("date", "==", selectedDate), where("type", "==", "sticker"));
+                    const querySnapshot = await getDocs(q);
+                    querySnapshot.forEach(async (doc) => {
+                        await deleteDoc(doc.ref);
+                    });
+                } catch (e) {
+                    console.error("Error removing document: ", e);
+                }
+            }
+            else {
+                console.log("201 sticker.src", sticker.src);
+                // Replace with the new sticker
+                updatedEvents[eventIndex] = { ...updatedEvents[eventIndex], extendedProps: { type: 'sticker', image: sticker.src } };
+    
+                // Update Firebase
+                try {
+                    const q = query(collection(db, "events"), where("date", "==", selectedDate), where("type", "==", "sticker"));
+                    const querySnapshot = await getDocs(q);
+                    querySnapshot.forEach(async (doc) => {
+                        await updateDoc(doc.ref, { content: sticker.src });
+                    });
+                } catch (e) {
+                    console.error("Error updating document: ", e);
+                }
+            }
         } else {
+            console.log("217 sticker.src", sticker.src);
             // Add new sticker event
             updatedEvents.push({ date: selectedDate, extendedProps: { type: 'sticker', image: sticker.src } });
+            // Save to Firebase
+            try {
+                await addDoc(collection(db, "events"), {
+                    date: selectedDate,
+                    type: "sticker",
+                    content: sticker.src,
+                });
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
         }
         setEvents(updatedEvents);
-        //Save selected sticker to Firebase
-        try {
-            await addDoc(collection(db, "events"), {
-              date: selectedDate,
-              type: "sticker",
-              content: sticker.src,
-            });
-          } catch (e) {
-            console.error("Error adding document: ", e);
-        }
         setSelectedDate(null); // Reset selected date after choosing a sticker
         setShowStickers(false); // Close the sticker display after selection
     };
@@ -204,25 +247,42 @@ export default function Calendar() {
     const renderStickersDisplay = () => {
         //console.log("renderStickersDisplay called");
         return (
-            <ScrollArea className="h-50 w-full overflow-y-auto">
-                <Grid container spacing={1} style={{ padding: 10, maxWidth: 300 }}>
-                    {stickerImages.map((sticker) => (
-                        <Grid item xs={3} key={sticker.id} style={{ height: '40px' }}>
-                            <IconButton
-                                onClick={() => {
-                                    handleStickerSelect(sticker);
-                                }}
-                            >
-                                <img
-                                    src={sticker.src}
-                                    alt={sticker.alt}
-                                    style={{ width: '40px', height: '30px' }}
-                                />
-                            </IconButton>
-                        </Grid>
-                    ))}
-                </Grid>
-            </ScrollArea>
+            <div className="sticker-display">
+                <IconButton
+                    onClick={() => {
+                        console.log('Close button clicked');
+                        setShowStickers(false);
+                    }}
+                >
+                    <X size={18} />
+                </IconButton>
+                <ScrollArea className="h-50 w-full overflow-y-auto">
+                    <Grid container spacing={1} style={{ padding: 10, maxWidth: 300 }}>
+                        {stickerImages.map((sticker) => (
+                            <Grid item xs={3} key={sticker.id} style={{ height: '40px' }}>
+                                <IconButton
+                                    onClick={() => {
+                                        handleStickerSelect(sticker);
+                                    }}
+                                    style={{
+                                        border: selectedSticker === sticker.src ? '2px solid blue' : 'none', // Highlight selected sticker
+                                        borderRadius: '4px', // Make the border square with slight rounding
+                                        padding: '2px', // Adjust padding to make the border smaller
+                                        width: '44px', // Ensure the icon button width remains consistent with the image size
+                                        height: '34px' // Ensure the icon button height remains consistent with the image size
+                                    }}
+                                >
+                                    <img
+                                        src={sticker.src}
+                                        alt={sticker.alt}
+                                        style={{ width: '40px', height: '30px' }}
+                                    />
+                                </IconButton>
+                            </Grid>
+                        ))}
+                    </Grid>
+                </ScrollArea>
+            </div>
         );
     };
 
@@ -266,13 +326,20 @@ export default function Calendar() {
     };
 
     const renderAddNote = () => (
-        <div className="grid w-full gap-2">
-            <Textarea
-                placeholder="Type Your Note Here"
-                value={noteContent}
-                onChange={(e) => setNoteContent(e.target.value)} // Update note content state
-            />
-            <Button onClick={handleSaveNote}>Save Note</Button> {/* Save note on click */}
+        <div className="note-display">
+            <IconButton
+                onClick={() => setShowAddNote(false)} // Close the note display
+                >
+                    <X size={16} />
+            </IconButton>
+            <div className="grid w-full gap-2">
+                <Textarea
+                    placeholder="Type Your Note Here"
+                    value={noteContent}
+                    onChange={(e) => setNoteContent(e.target.value)} // Update note content state
+                />
+                <Button onClick={handleSaveNote}>Save Note</Button> {/* Save note on click */}
+            </div>
         </div>
     );
 
@@ -299,13 +366,20 @@ export default function Calendar() {
     }
 
     const renderAddReminder = () => (
-        <div className="grid w-full gap-2">
-            <Textarea
-                placeholder="Type Your Reminder Here"
-                value={reminderContent}
-                onChange={(e) => setReminderContent(e.target.value)} // Update reminder content state
-            />
-            <Button onClick={handleSaveReminder}>Save Reminder</Button> {/* Save reminder on click */}
+        <div className="reminder-display">
+            <IconButton
+                onClick={() => setShowAddReminder(false)} // Close the reminder display
+            >
+                <X size={16} />
+            </IconButton>
+            <div className="grid w-full gap-2">
+                <Textarea
+                    placeholder="Type Your Reminder Here"
+                    value={reminderContent}
+                    onChange={(e) => setReminderContent(e.target.value)} // Update reminder content state
+                />
+                <Button onClick={handleSaveReminder}>Save Reminder</Button> {/* Save reminder on click */}
+            </div>
         </div>
     );
     
@@ -382,22 +456,10 @@ export default function Calendar() {
                         </DropdownMenuContent>
                     )}
                 </DropdownMenu>
-            </div>
-            {showStickers && (
-                <div className="sticker-display">
-                    {renderStickersDisplay()}
                 </div>
-            )}
-            {showAddNote && (
-                <div className="note-display">
-                    {renderAddNote()}
+                {showStickers && renderStickersDisplay()}
+                {showAddNote && renderAddNote()}
+                {showAddReminder && renderAddReminder()}
                 </div>
-            )}
-            {showAddReminder && (
-                <div className="reminder-display">
-                    {renderAddReminder()}
-                </div>
-            )}
-        </div>
         );
     }

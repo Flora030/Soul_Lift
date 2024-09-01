@@ -2,7 +2,7 @@
 .journalPage {
   background: url('/Diary_Background.jpg') no-repeat center center fixed;
   background-size: contain;
-  width: 60%;
+  width: 100%;
   max-width: 800px; /* Maximum width to constrain the journal */
   height: 100vh; /* Ensure the page takes full viewport height */
   display: flex;
@@ -45,7 +45,7 @@
   display: flex;
   justify-content: flex-start; /* Align toolbar items to the left */
   margin-bottom: 10px;
-  width: 24%; /* Make the toolbar full width */
+  width: 40%; /* Make the toolbar full width */
   padding: 10px; /* Add padding inside the toolbar */
   border: 1px solid #ccc; /* Add a border around the toolbar */
   background-color: #f9f9f9; /* Add a background color */
@@ -58,6 +58,7 @@
   margin: 0 5px;
   padding: 5px 10px;
   cursor: pointer;
+  width: 100%;
 }
 
 .toolbar button:hover {
